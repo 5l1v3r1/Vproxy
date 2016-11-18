@@ -10,7 +10,7 @@ Forward HTTP/S Traffic To Proxy Instance
 #Usage
 >Setup PPTP VPN server on 192.168.1.9 and redirect traffic to port 80,443 to 192.168.1.10:8080 proxy
 ```sh
-$python vproxy.py -localip 192.168.1.9 -phost 192.168.1.10 -pport 8080 - ports 80,443
+$python vproxy.py -localip 192.168.1.9 -phost 192.168.1.10 -pport 8080 -port 80,443
 ```
 #Limitations
 >Certificate Pinning
