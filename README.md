@@ -6,6 +6,7 @@ Forward HTTP/S Traffic To Proxy Instance
 
 #System Requirements
 > This script was built and test on Kali-Linux and should work on any linux distribution
+> pip install termcolor
 
 #Usage
 >Setup VPN server on localip and redirect traffic sent from clients to destination port 80 and 443 to proxy instance
