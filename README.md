@@ -1,4 +1,4 @@
-# Vproxy V1.0
+# Vproxy v1.0
 Forward HTTP/S Traffic To Proxy Instance
 
 #Description
