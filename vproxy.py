@@ -47,7 +47,7 @@ def write_conf(proxyhost,proxyport,ports,isr):
 	f.write('sleep 4\n')
 	f.write('service pptpd restart\n')
 	f.close() 
-	subprocess.Popen("bash vproxy.sh", shell=True, stdout=subprocess.PIPE).stdout.read()
+	subprocess.Popen("sudo bash vproxy.sh", shell=True, stdout=subprocess.PIPE).stdout.read()
 
 def cleanup():
 	subprocess.Popen("service pptpd stop", shell=True, stdout=subprocess.PIPE).stdout.read()
@@ -124,6 +124,6 @@ def main():
 			cleanup()
 
 		cleanup()
-		
+
 if __name__ == '__main__':
     main()
