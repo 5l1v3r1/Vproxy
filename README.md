@@ -12,7 +12,7 @@ Forward HTTP/S Traffic To Proxy Instance
 >Setup VPN server on localip and redirect traffic sent from clients to destination port 80 and 443 to proxy instance
 
 ```sh
-$python vproxy.py -localip 192.168.1.9 -phost 192.168.1.10 -pport 8080 -port 80,443
+$sudo python vproxy.py -localip 192.168.1.9 -phost 192.168.1.10 -pport 8080 -port 80,443
 ```
 #Limitations
 >Certificate Pinning
