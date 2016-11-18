@@ -8,7 +8,8 @@ Forward HTTP/S Traffic To Proxy Instance
 > This script was built and test on Kali-Linux and should work on any linux distribution
 
 #Usage
->Setup PPTP VPN server on 192.168.1.9 and redirect traffic to port 80,443 to 192.168.1.10:8080 proxy
+>Setup VPN server on localip, and redirect traffic sent from clients to destination port 80 and 443 to proxy instance
+
 ```sh
 $python vproxy.py -localip 192.168.1.9 -phost 192.168.1.10 -pport 8080 -port 80,443
 ```
