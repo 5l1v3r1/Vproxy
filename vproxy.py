@@ -111,7 +111,7 @@ def main():
 		write_conf(args.phost,args.pport,None,isr=False)
 		print "================================================="
 		print "Vproxy Output: "
-		print "1.Configure new VPN profile on the mobile device"
+		print "1.Configure new VPN profile:"
 		print "	PPTP Server: "+ colored(args.localip,"yellow")
 		print "	PPTP User: "+ colored("Vproxy","yellow")
 		print "	PPTP Password: "+ colored("Vproxy123","yellow")
