@@ -17,5 +17,10 @@ use Vproxy to solve this issue and capture the whole HTTP/S traffic
 ```sh
 $sudo python vproxy.py -localip 192.168.1.9 -phost 192.168.1.10 -pport 8080 -port 80,443
 ```
+
+#Configuring VPN Videos
+> IOS - https://www.youtube.com/watch?v=TC-xJ9rCTXU
+> Android - https://www.youtube.com/watch?v=bFeJZKX4O3A
+
 #Limitations
 >Certificate Pinning
