@@ -51,6 +51,7 @@ def write_conf(proxyhost,proxyport,ports,isr):
 
 def cleanup():
 	subprocess.Popen("service pptpd stop", shell=True, stdout=subprocess.PIPE).stdout.read()
+	subprocess.Popen("ifconfig ppp0 down", shell=True, stdout=subprocess.PIPE).stdout.read()
 	subprocess.Popen("iptables -t nat -F", shell=True, stdout=subprocess.PIPE).stdout.read()
 
 def main():
