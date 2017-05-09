@@ -6,7 +6,8 @@ Forward HTTP/S Traffic To Proxy Instance
 use Vproxy to solve this issue and capture the whole HTTP/S traffic
 
 #System Requirements
->This script was built and tested on Kali-Linux and should work on any linux distribution
+>Linux
+>Python 2.x
 
 #Prerequisites
 >pip install termcolor
