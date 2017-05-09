@@ -33,6 +33,8 @@ $sudo python vproxy.py -ip [LOCALIP] -mode monitor
 >Certificate Pinning
 
 #Updates
-> Updated features - Monitor vs Redirect mode is now active
-> PIP module - future update
-> 
+>Updated features - Monitor vs Redirect mode is now active
+
+#Future Work
+>PIP module
+
