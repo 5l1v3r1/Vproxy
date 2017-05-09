@@ -14,6 +14,7 @@ use Vproxy to solve this issue and capture the whole HTTP/S traffic
 
 #Usage
 >Setup VPN server on localip and redirect traffic sent from the device to proxy
+
 >Setup VPN server on localip for monitor traffic from devices 
 
 ```sh
