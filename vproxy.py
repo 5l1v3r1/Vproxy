@@ -1,31 +1,132 @@
-#/usr/bin/python
+#!/usr/bin/env python
 
+'''
+ This file is part of Vproxy Project (https://github.com/B4RD4k/Vproxy).
+ Version: 1.6
+ Copyright (c) 2014-2017 Eran.Vaknin (B4RD4k) eranvak91@gmail.com
+'''
+
+import re
 import sys
-import time
 import os
 import argparse
-import re
 import subprocess
 from termcolor import colored
 
-def write_conf(proxyhost,proxyport,ports,isr):
-	if (os.path.exists('vproxy.sh')):
-				os.remove('vproxy.sh')
-	f = open('vproxy.sh','w')
-	f.write('apt-get -y install pptpd || {echo "Could not install pptpd" exit 1}\n')
+
+def check_root():
+	if not os.geteuid() == 0:
+		print colored("[!] Vproxy must run as root", "red", attrs=['bold'])
+		sys.exit(0)
+
+def user_view(ip,mode,ports,proxy):
+	print "[+] Vproxy is running in "+colored(mode,"blue", attrs=['bold'])+" mode..."
+	ans = raw_input("[+] SSL certificate is installed properly on the mobile device (Y/N)? ").lower()
+	if (ans == "yes" or ans == "y"):
+		proc1 = subprocess.Popen("sudo bash vconfig.sh", shell=True, stdout=subprocess.PIPE).stdout.read()
+		print ""
+		if (mode == "redirect"):
+			print colored("[+]Vconfig output:",attrs=['bold'])
+			print colored("  [-] Intercepting port: ",attrs=['bold']) + colored(ports, "blue", attrs=['bold'])
+			print colored("  [-] Redirecting to proxy: ",attrs=['bold']) + colored(proxy, "blue", attrs=['bold'])
+			subprocess.Popen("sudo wireshark", shell=True, stdout=subprocess.PIPE)
+			print ""
+		print colored("[-] ","yellow", attrs=['bold']) + colored("VPN server address: ",attrs=['bold']) + colored(ip,"blue", attrs=['bold'])
+		print colored("[-] ","yellow", attrs=['bold']) + colored("Username: ",attrs=['bold']) + colored("Vuser","blue", attrs=['bold'])
+		print colored("[-] ","yellow", attrs=['bold']) + colored("Password: ",attrs=['bold']) + colored("Vpassword","blue", attrs=['bold'])
+		print ""
+		print colored("~~~~~~~Lets Rock!~~~~~~~~","yellow",attrs=['bold'])
+		print ""
+		try:
+			raw_input("[!] Press any to stop Vproxy...")
+			cleanup()
+		except KeyboardInterrupt:
+			cleanup()
+	else:
+		print colored("[!] Check arguments and try again", "red", attrs=['bold'])
+		sys.exit(0)
+
+def cleanup():
+	print ""
+	print ("[!] Exiting now...")
+	subprocess.Popen("service pptpd stop", shell=True, stdout=subprocess.PIPE).stdout.read()
+	subprocess.Popen("ifconfig ppp0 down", shell=True, stdout=subprocess.PIPE).stdout.read()
+	subprocess.Popen("iptables -t nat -F", shell=True, stdout=subprocess.PIPE).stdout.read()
+	subprocess.Popen("sudo killall wireshark", shell=True, stdout=subprocess.PIPE).stdout.read()
+
+def print_logo():
+	logo = '''
+	'##::::'##:'########::'########:::'#######::'##::::'##:'##:::'##:
+	 ##:::: ##: ##.... ##: ##.... ##:'##.... ##:. ##::'##::. ##:'##::
+	 ##:::: ##: ##:::: ##: ##:::: ##: ##:::: ##::. ##'##::::. ####:::
+	 ##:::: ##: ########:: ########:: ##:::: ##:::. ###::::::. ##::::
+	. ##:: ##:: ##.....::: ##.. ##::: ##:::: ##::: ## ##:::::: ##::::
+	:. ## ##::: ##:::::::: ##::. ##:: ##:::: ##:: ##:. ##::::: ##::::
+	::. ###:::: ##:::::::: ##:::. ##:. #######:: ##:::. ##:::: ##::::
+	:::...:::::..:::::::::..:::::..:::.......:::..:::::..:::::..:::::
+	'''
+	print logo
+
+def check_args(arguments):
+	#Debug Arguments
+	#print arguments
+
+	regex_ip = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+	regex_proxy = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]):[0-9]+$"
+	a_mode = arguments.mode.lower()
+	if(arguments.port):
+		ismonitor = True
+		a_port = arguments.port.split(",")
+	else:
+		ismonitor = False
+		a_port = None
+
+	if (ismonitor):
+		for port in a_port:
+			if (int(port) > 65536):
+				print colored("[!] Check arguments and try again", "red", attrs=['bold'])
+				sys.exit(0)
+	if(re.match(regex_ip,arguments.ip)):
+		if(arguments.proxy and re.match(regex_proxy, arguments.proxy)):
+			if(a_mode == "r" or a_mode == "redirect"):
+				#Start redirect mode
+				do_vproxy(arguments.ip,a_port,a_mode,arguments.proxy)
+				user_view(arguments.ip,"redirect",a_port,arguments.proxy)
+			else:
+				print colored("[!] Check arguments and try again", "red", attrs=['bold'])
+				sys.exit(0)
+		else:
+			if (a_mode == "m" or a_mode == "monitor"):
+				#Start monitor mode
+				do_vproxy(arguments.ip,a_port,a_mode,None)
+				user_view(arguments.ip,"monitor",None,None)
+			else:
+				print colored("[!] Check arguments and try again", "red", attrs=['bold'])
+				sys.exit(0)
+	else:
+		print colored("[!] Check arguments and try again", "red", attrs=['bold'])
+		sys.exit(0)
+
+def do_vproxy(ip,ports,mode,proxy):
+	if (os.path.exists('vconfig.sh')):
+		os.remove('vconfig.sh')
+	f = open('vconfig.sh', 'w')
+	f.write('apt-get -y install pptpd\n')
+	f.write('sudo apt-get -y install wireshark\n')
+	f.write('sleep 2\n')
 	f.write('iptables -t nat -F\n')
-	if(isr):
+	if (mode == "r" or mode == "redirect" ):
 		for port in ports:
-			f.write('iptables -t nat -A PREROUTING -p tcp -s 192.168.2.0/24 --dport '+port+' -j DNAT --to-destination '+proxyhost+':'+proxyport+'\n')
+			f.write('iptables -t nat -A PREROUTING -p tcp -s 192.168.2.0/24 --dport ' + port + ' -j DNAT --to-destination ' + proxy.split(':')[0] + ':' + proxy.split(':')[1] + '\n')
 	f.write('sysctl -w net.ipv4.ip_forward=1\n')
 	f.write('iptables -t nat -A POSTROUTING -j MASQUERADE\n')
 	f.write('cat >/etc/ppp/chap-secrets <<END\n')
-	f.write('Vproxy pptpd Vproxy123 *\n')
+	f.write('Vuser pptpd Vpassword *\n')
 	f.write('END\n')
 	f.write('cat >/etc/pptpd.conf <<END\n')
 	f.write('option /etc/ppp/options.pptpd\n')
 	f.write('localip 192.168.2.1\n')
-	f.write('remoteip 192.168.2.10-100\n')
+	f.write('remoteip 192.168.2.10-30\n')
 	f.write('END\n')
 	f.write('cat >/etc/ppp/options.pptpd <<END\n')
 	f.write('name pptpd\n')
@@ -34,7 +135,7 @@ def write_conf(proxyhost,proxyport,ports,isr):
 	f.write('refuse-mschap\n')
 	f.write('require-mschap-v2\n')
 	f.write('require-mppe-128\n')
-	f.write('ms-dns 8.8.4.4\n')
+	f.write('ms-dns 8.8.8.8\n')
 	f.write('proxyarp\n')
 	f.write('lock\n')
 	f.write('nobsdcomp \n')
@@ -45,99 +146,33 @@ def write_conf(proxyhost,proxyport,ports,isr):
 	f.write('nologfd\n')
 	f.write('END\n')
 	f.write('sleep 4\n')
-	f.write('service pptpd restart\n')
-	f.close() 
-	subprocess.Popen("bash vproxy.sh", shell=True, stdout=subprocess.PIPE).stdout.read()
-
-def cleanup():
-	print colored("[+]",'green')+colored(" Starting Cleanup, GoodBye :)","blue", attrs=['bold'])
-	subprocess.Popen("service pptpd stop", shell=True, stdout=subprocess.PIPE).stdout.read()
-	subprocess.Popen("ifconfig ppp0 down", shell=True, stdout=subprocess.PIPE).stdout.read()
-	subprocess.Popen("iptables -t nat -F", shell=True, stdout=subprocess.PIPE).stdout.read()
+	f.write('sudo service pptpd restart\n')
+	f.close()
 
 def main():
-	print """
+	print_logo()
 
- /$$    /$$                                                 
-| $$   | $$                                                 
-| $$   | $$ /$$$$$$   /$$$$$$   /$$$$$$  /$$   /$$ /$$   /$$
-|  $$ / $$//$$__  $$ /$$__  $$ /$$__  $$|  $$ /$$/| $$  | $$
- \  $$ $$/| $$  \ $$| $$  \__/| $$  \ $$ \  $$$$/ | $$  | $$
-  \  $$$/ | $$  | $$| $$      | $$  | $$  >$$  $$ | $$  | $$
-   \  $/  | $$$$$$$/| $$      |  $$$$$$/ /$$/\  $$|  $$$$$$$
-    \_/   | $$____/ |__/       \______/ |__/  \__/ \____  $$
-          | $$                                     /$$  | $$
-          | $$       by eran@cyberint.com         |  $$$$$$/
-          |__/                                     \______/ 
+	#Parse User Arguments
+	parser = argparse.ArgumentParser(description='Use Vproxy to sniff or redirect your mobile traffic to any proxy instance easily')
+	bgroup = parser.add_argument_group("Basic Parameters")
+	bgroup.add_argument('-ip', help='Local IP', required=True)
+	bgroup.add_argument('-port', help='Which port/s do you want to sniff? 80,443...')
+	bgroup = parser.add_argument_group("Advanced Parameters")
+	bgroup.add_argument('-proxy', help='The Proxy Instance ($HOST:$PORT)')
+	bgroup.add_argument('-mode', help='Monitor (M) or Redirect (R)', required=True)
 
-	"""
+	#Check for default behavior
+	if len(sys.argv) == 1:
+		parser.print_help()
+		sys.exit(0)
 
-	#Define The ArgParse
-	parser = argparse.ArgumentParser(
-	    epilog = ''' Example: 
-   python vproxy.py -localip '''+ colored("192.168.1.9","yellow") + ''' -phost ''' + colored("192.168.1.10", "yellow") + ''' -pport '''+colored("8080","yellow")+''' -port 80,443''',
-	    formatter_class=argparse.RawTextHelpFormatter)
-
-	parser.add_argument('-localip', help='Make sure bridge mode is configured', required=True)
-	parser.add_argument('-phost', help='Proxy host, e.g 192.168.1.0', required=False)
-	parser.add_argument('-pport', help='Proxy port, e,g 8080', required=False)
-	parser.add_argument('-port', help='Which port to forward to proxy, e.g 80,443', required=False)
 	args = parser.parse_args()
 
-	if (args.phost and args.pport and not args.port):
-		print colored("[!] Missing port argument", "red",attrs=['bold'])
-	elif ((args.phost and not args.pport) or (args.pport and not args.phost)):
-		print colored("[!] Missing proxy arguments check again","red",attrs=['bold'])
-	elif (args.phost and args.pport and args.localip and args.port):
-		# print colored("[V]Starting Vproxy to forward traffic on port: ","green",attrs=['bold'])+colored(str(args.port.split(",")),"yellow",attrs=['bold'])+colored(" to proxy instance: ","green",attrs=['bold'])+colored(args.phost+":"+args.pport,"yellow",attrs=['bold'])
-		print colored("Vproxy Configurations:","cyan", attrs=['bold'])
-		print colored("=================================================","cyan")
-		print colored("[+]","green")+" Forwarding Ports: "+colored(str(args.port.split(",")),"green",attrs=['bold'])
-		print colored("[+]","green")+" Proxy host: "+colored(str(args.phost)+":"+str(args.pport),"green",attrs=['bold'])
-		print colored("=================================================","cyan")
-		write_conf(args.phost,args.pport,args.port.split(","),isr=True)
-		print ""
-		print colored("Vproxy Output: ","cyan", attrs=['bold'])
-		print colored("=================================================","cyan")
-		print colored('[+]','green',attrs=['bold'])+" Export and install Proxy SSL Certificate"
-		print colored('[+]','green',attrs=['bold'])+" Configure new VPN profile:"
-		print "	PPTP Server: "+ colored(args.localip,"green",attrs=['bold'])
-		print "	PPTP User: "+ colored("Vproxy","green",attrs=['bold'])
-		print "	PPTP Password: "+ colored("Vproxy123","green",attrs=['bold'])
-		print colored('[+]','green',attrs=['bold'])+" FireUp proxy and "+colored("Happy Hacking!","green",attrs=['underline','bold'])
-		print colored("=================================================","cyan")
+	#Check for root privileges
+	check_root()
 
-		try:
-			print ""
-			raw_input("[!]Press any key to stop Vproxy...")
-			print ""
-		except KeyboardInterrupt:
-			print "\r\n"
-			cleanup()
-
-		cleanup()
-	elif (not args.phost and not args.pport and not args.port):
-		print colored("[V] Starting Vproxy...","green",attrs=['bold'])
-		write_conf(args.phost,args.pport,None,isr=False)
-		print ""
-		print colored("Vproxy Output: ","cyan",attrs=['bold'])
-		print colored("=================================================","cyan")
-		print colored('[+]','green',attrs=['bold'])+" Configure new VPN profile:"
-		print "	PPTP Server: "+ colored(args.localip,"green", attrs=['bold'])
-		print "	PPTP User: "+ colored("Vproxy","green",attrs=['bold'])
-		print "	PPTP Password: "+ colored("Vproxy123","green",attrs=['bold'])
-		print colored('[+]','green',attrs=['bold'])+" Use Wireshark or TCPDump to analyze the traffic"
-		print colored("=================================================","cyan")
-		
-		try:
-			print 
-			raw_input("[!]Press any key to close Vproxy...")
-			print ""
-		except KeyboardInterrupt:
-			print "\r\n"
-			cleanup()
-
-		cleanup()
+	#Check arguments from user and start Vproxy
+	check_args(args)
 
 if __name__ == '__main__':
-    main()
+	main()
