@@ -12,10 +12,15 @@ use Vproxy to solve this issue and capture the whole HTTP/S traffic
 >pip install termcolor
 
 #Usage
->Setup VPN server on localip and redirect traffic sent from the clients (80,443) to proxy 192.168.1.10:8080 
+>Setup VPN server on localip and redirect traffic sent from the device to proxy
+>Setup VPN server on localip for monitor traffic from devices 
 
 ```sh
-$sudo python vproxy.py -localip 192.168.1.9 -phost 192.168.1.10 -pport 8080 -port 80,443
+$sudo python vproxy.py -ip [LOCALIP] -port [PORTLIST] -proxy [PROXYHOST:PROXYPORT]-mode redirect
+```
+
+```sh
+$sudo python vproxy.py -ip [LOCALIP] -mode monitor
 ```
 
 #Configuring VPN Videos
@@ -25,3 +30,8 @@ $sudo python vproxy.py -localip 192.168.1.9 -phost 192.168.1.10 -pport 8080 -por
 
 #Limitations
 >Certificate Pinning
+
+#Updates
+> Updated features - Monitor vs Redirect mode is now active
+> PIP module - future update
+> 
