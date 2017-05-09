@@ -13,9 +13,9 @@ use Vproxy to solve this issue and capture the whole HTTP/S traffic
 >pip install termcolor
 
 #Usage
->Setup VPN server on localip and redirect traffic sent from the device to proxy
+>Setup VPN server on localip for redirecting traffic sent from the device to proxy instance
 
->Setup VPN server on localip for monitor traffic from devices 
+>Setup VPN server on localip for monitoring traffic from devices 
 
 ```sh
 $sudo python vproxy.py -ip [LOCALIP] -port [PORTLIST] -proxy [PROXYHOST:PROXYPORT]-mode redirect
