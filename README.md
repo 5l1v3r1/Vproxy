@@ -1,4 +1,4 @@
-# Vproxy v1.6
+# Vproxy v1.7
 Forward HTTP/S Traffic To Proxy Instance
 
 #Description
@@ -31,8 +31,6 @@ $sudo python vproxy.py -ip [LOCALIP]  -port [PORTLIST] -mode Monitor
 ```sh
 $sudo python vproxy.py -ip [LOCALIP] -port [PORTLIST] -proxy [PROXYHOST:PROXYPORT] -int 192.168.1.0/24 -mode Redirect
 ```
-
-
 
 
 #Configuring VPN Videos
