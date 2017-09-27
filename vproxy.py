@@ -37,7 +37,7 @@ def user_view(ip,mode,ports,proxy,wireshark):
     if ans == "yes" or ans == "y":
         subprocess.Popen("sudo bash vconfig.sh", shell=True, stdout=subprocess.PIPE).stdout.read()
         print ""
-        if mode == "redirect":
+        if mode == "Redirect":
             print colored("[+]Vconfig Output:", attrs=['bold'])
             print colored("  [-] Intercepting Port: ", attrs=['bold']) + colored(ports, "blue", attrs=['bold'])
             print colored("  [-] Redirecting To proxy: ", attrs=['bold']) + colored(proxy, "blue", attrs=['bold'])
