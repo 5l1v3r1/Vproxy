@@ -42,7 +42,8 @@ $sudo python vproxy.py -ip [LOCALIP] -port [PORTLIST] -proxy [PROXYHOST:PROXYPOR
 >Certificate Pinning
 
 #Updates
->Intercept Specific Hostnames or IPs
+>Intercept Specific Hostnames or IPs (-int) option
+
 >Updated features - Monitor vs Redirect mode is now active
 
 #Future Work
