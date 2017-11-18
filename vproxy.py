@@ -22,7 +22,7 @@ def get_ip():
             ip = re.findall('(?<=inet\saddr:)[0-9\.]+', iface)
             if ip:
                 return ip[0]
-    return False
+    return None
 
 
 def check_root():
