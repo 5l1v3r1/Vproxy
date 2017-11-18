@@ -81,7 +81,10 @@ def print_logo():
 ::. ###:::: ##:::::::: ##:::. ##:. #######:: ##:::. ##:::: ##::::
 :::...:::::..:::::::::..:::::..:::.......:::..:::::..:::::..:::::
 '''
-    print logo+colored("Hostname IP: ", "red", attrs=['bold']) + get_ip()
+    if (get_ip() is not None):
+        print logo+colored("Hostname IP: ", "red", attrs=['bold']) + get_ip()
+    else:
+        print logo
 
 
 def check_args(arguments):
